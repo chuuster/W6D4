@@ -6,8 +6,11 @@ class FollowToggle {
     this.userId = this.$el.data("user-id");
     this.followState = this.$el.data("initial-follow-state");
     this.render();
-    this.$el.on('click', e => {this.handleClick(e);});
+    this.$el.on('click', this.handleClick.bind(this));
   }
+
+  // e => {this.handleClick(e);}
+  // this.handleClick.bind(this)
 
   render() {
     if(this.followState === "unfollowed") {

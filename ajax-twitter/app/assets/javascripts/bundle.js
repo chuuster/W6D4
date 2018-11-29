@@ -108,8 +108,21 @@ const APIUtil = {
       method: method,
       dataType: "JSON"
     });
+  },
+
+  searchUsers: (queryVal, success) => {
+    return $.ajax ({
+      url: "/users/search",
+      method: "GET",
+      data: {
+        query: queryVal
+      },
+      dataType: "JSON"
+    });
   }
 };
+
+
 
 module.exports = APIUtil;
 
@@ -131,8 +144,11 @@ class FollowToggle {
     this.userId = this.$el.data("user-id");
     this.followState = this.$el.data("initial-follow-state");
     this.render();
-    this.$el.on('click', e => {this.handleClick(e);});
+    this.$el.on('click', this.handleClick.bind(this));
   }
+
+  // e => {this.handleClick(e);}
+  // this.handleClick.bind(this)
 
   render() {
     if(this.followState === "unfollowed") {
@@ -176,10 +192,48 @@ module.exports = FollowToggle;
 /***/ (function(module, exports, __webpack_require__) {
 
 const FollowToggle = __webpack_require__(/*! ./follow_toggle.js */ "./frontend/follow_toggle.js");
+const UsersSearch = __webpack_require__(/*! ./users_search.js */ "./frontend/users_search.js");
 
 $( () => {
   $('button.follow-toggle').each((idx, el) => new FollowToggle(el));
+  $('nav.users-search').each((idx, el) => new UsersSearch(el));
 });
+
+
+/***/ }),
+
+/***/ "./frontend/users_search.js":
+/*!**********************************!*\
+  !*** ./frontend/users_search.js ***!
+  \**********************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+const APIUtil = __webpack_require__(/*! ./api_util.js */ "./frontend/api_util.js");
+
+class UsersSearch {
+  constructor(el) {
+    this.$el = $(el);
+    this.$input = $('nav input');
+    this.$ul = $('ul');
+    this.$el.on("input", this.handleInput.bind(this));
+  }
+
+  handleInput(event) {
+    APIUtil.searchUsers(this.$input.val())
+      // .then((res) => {console.log(res)});
+      .then(res => this.renderResults(res));
+  }
+
+  renderResults(users) {
+    $('ul.users').empty();
+    users.forEach((user) => {
+      $('ul.users').append($(`<li> <a href= user_url(${user.id})>${user.username}</a> </li>`));
+    });
+  }
+}
+
+module.exports = UsersSearch;
 
 
 /***/ })
